@@ -1,4 +1,145 @@
 $(document).ready(function() {
+	// --- GESTIONE MUSICA DI SOTTOFONDO E VOLUME ---
+	var bgMusic = document.getElementById('bg-music');
+	var successSound = document.getElementById('success-sound');
+	var errorSound = document.getElementById('error-sound');
+	var applauseSound = document.getElementById('applause-sound');
+	var $musicBtn = $('#musicControlBtn');
+	var $musicContainer = $('#musicControlContainer');
+	var $volumeSlider = $('#volumeSlider');
+	
+	// Recupera lo stato muto precedente o default a falso (attivo)
+	var isMuted = localStorage.getItem('ruota_fortuna_music_muted') === 'true';
+	
+	// Recupera il volume precedente o default a 0.5 (50%)
+	var savedVolume = localStorage.getItem('ruota_fortuna_music_volume');
+	var currentVolume = savedVolume !== null ? parseFloat(savedVolume) : 0.5;
+	
+	// Applica il volume iniziale all'elemento audio e allo slider. Gli effetti hanno un volume indipendente e alto (0.9) per risaltare.
+	bgMusic.volume = currentVolume;
+	if (successSound) successSound.volume = 0.9;
+	if (errorSound) errorSound.volume = 0.9;
+	if (applauseSound) applauseSound.volume = 1.0;
+	$volumeSlider.val(currentVolume);
+	
+	// Applica lo stato iniziale visivo al pulsante e al contenitore
+	if (isMuted) {
+		$musicBtn.addClass('muted');
+		$musicContainer.addClass('muted');
+	} else {
+		$musicBtn.removeClass('muted');
+		$musicContainer.removeClass('muted');
+	}
+	
+	// Funzione per avviare la riproduzione della musica di sottofondo
+	function playMusic() {
+		if (isMuted) return;
+		bgMusic.volume = currentVolume;
+		bgMusic.play().then(function() {
+			$musicBtn.removeClass('muted');
+			$musicContainer.removeClass('muted');
+		}).catch(function(error) {
+			console.log("Autoplay in attesa di interazione utente.");
+		});
+	}
+	
+	// Funzione per mettere in pausa la riproduzione della musica di sottofondo
+	function pauseMusic() {
+		bgMusic.pause();
+	}
+
+	// Funzioni per riprodurre gli effetti sonori rispettando lo stato muto (volume indipendente e alto a 0.9 per risaltare)
+	function playApplauseSound() {
+		if (isMuted || !applauseSound) return;
+		applauseSound.volume = 1.0; // loud to highlight
+		applauseSound.currentTime = 0;
+		applauseSound.play().catch(function(error) {
+			console.log('Errore riproduzione suono applauso:', error);
+		});
+	}
+
+	function playSuccessSound() {
+		if (isMuted || !successSound) return;
+		successSound.volume = 0.9;
+		successSound.currentTime = 0; // Ripristina all'inizio se il suono è già in riproduzione
+		successSound.play().catch(function(error) {
+			console.log("Errore riproduzione suono successo:", error);
+		});
+	}
+
+	function playErrorSound() {
+		if (isMuted || !errorSound) return;
+		errorSound.volume = 0.9;
+		errorSound.currentTime = 0; // Ripristina all'inizio se il suono è già in riproduzione
+		errorSound.play().catch(function(error) {
+			console.log("Errore riproduzione suono errore:", error);
+		});
+	}
+	
+	// Toggle della musica al click del pulsante fluttuante
+	$musicBtn.click(function(e) {
+		e.stopPropagation(); // Evita di attivare altri gestori di click sul documento
+		isMuted = !isMuted;
+		localStorage.setItem('ruota_fortuna_music_muted', isMuted);
+		
+		if (isMuted) {
+			pauseMusic();
+			$musicBtn.addClass('muted');
+			$musicContainer.addClass('muted');
+		} else {
+			// UX: se il volume era a 0 e si riattiva la musica, alziamo il volume a 0.3
+			if (currentVolume === 0) {
+				currentVolume = 0.3;
+				$volumeSlider.val(0.3);
+				localStorage.setItem('ruota_fortuna_music_volume', 0.3);
+			}
+			bgMusic.volume = currentVolume;
+			$musicBtn.removeClass('muted');
+			$musicContainer.removeClass('muted');
+			playMusic();
+		}
+	});
+	
+	// Gestione dello slider del volume (evento input continuo per fluidità)
+	$volumeSlider.on('input', function() {
+		currentVolume = parseFloat(this.value);
+		localStorage.setItem('ruota_fortuna_music_volume', currentVolume);
+		
+		if (currentVolume === 0) {
+			// Se il volume viene azzerato, mutiamo il gioco
+			isMuted = true;
+			localStorage.setItem('ruota_fortuna_music_muted', true);
+			pauseMusic();
+			$musicBtn.addClass('muted');
+			$musicContainer.addClass('muted');
+		} else {
+			// Se il volume viene alzato, riattiviamo il gioco
+			isMuted = false;
+			localStorage.setItem('ruota_fortuna_music_muted', false);
+			bgMusic.volume = currentVolume;
+			$musicBtn.removeClass('muted');
+			$musicContainer.removeClass('muted');
+			playMusic();
+		}
+	});
+	
+	// Avvia l'audio al primo input o click dell'utente sulla pagina
+	function autoPlayOnInteraction() {
+		if (!isMuted) {
+			playMusic();
+		}
+		// Rimuove i listener per evitare esecuzioni ripetute
+		$(document).off('click keypress', autoPlayOnInteraction);
+	}
+	$(document).on('click keypress', autoPlayOnInteraction);
+	// ----------------------------------------------
+
+	// Funzione per rimuovere accenti ed equiparare lettere (es. È -> E)
+	function normalizeAccents(str) {
+		if (!str) return '';
+		return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+	}
+
 	//This var is for block the event for keypress while the player insert the phrase
 	var config = 0;
 	//Counter for game played
@@ -85,14 +226,21 @@ $(document).ready(function() {
 		// Rimuovi caratteri speciali mantenendo spazi
 		var phrase_ = phrase.replace(/[^A-Z\u00C0-\u00DF ]/g, "");
 		
-		// Create the letter cells
-		for (var i = 0, len = phrase_.length; i < len; i++) {
-			if (phrase_[i] !== " ") {
-				$('.tabbellone').append('<span class="letter-cell ' + phrase_[i] + ' uncheck">_</span>');
-			} else {
-				$('.tabbellone').append('<span class="space-cell"> </span>');
+		// Create the letter cells grouped by word containers to prevent broken word layouts on line wrapping
+		var words = phrase_.split(' ');
+		words.forEach(function(word) {
+			if (word.length > 0) {
+				var $wordCont = $('<span class="word-container"></span>');
+				for (var i = 0, len = word.length; i < len; i++) {
+					var origChar = word[i];
+					var baseChar = normalizeAccents(origChar);
+					var $cell = $('<span class="letter-cell ' + baseChar + ' uncheck">_</span>');
+					$cell.data('char', origChar);
+					$wordCont.append($cell);
+				}
+				$('.tabbellone').append($wordCont);
 			}
-		}
+		});
 		config = 0;
 		
 		// Reset input
@@ -144,24 +292,45 @@ $(document).ready(function() {
 		if (config == 0) {
 			var char = String.fromCharCode(e.charCode).toUpperCase();
 			
-			// Controlla che sia una lettera e non sia stata già usata
-			if (!/[A-Z\u00C0-\u00DF]/.test(char) || char_used.indexOf(char) !== -1) {
+			// Controlla che sia una lettera
+			if (!/[A-Z\u00C0-\u00DF]/.test(char)) {
 				e.preventDefault();
 				return;
 			}
 			
+			var baseChar = normalizeAccents(char);
+			
+			// Se la lettera è già stata usata, riproduci il suono di errore
+			if (char_used.indexOf(baseChar) !== -1) {
+				playErrorSound();
+				e.preventDefault();
+				return;
+			}
+			
+			// Riproduci l'effetto sonoro a seconda che la lettera sia presente o meno nel tabellone
+			var matchingCells = $('.' + baseChar);
+			if (matchingCells.length > 0) {
+				playSuccessSound();
+			} else {
+				playErrorSound();
+			}
+			
 			// Se ci sono lettere da scoprire
 			if ($(".uncheck")[0]) {
-				$('.' + char).text(char).addClass('check').removeClass('uncheck');
+				matchingCells.each(function() {
+					var origText = $(this).data('char');
+					$(this).text(origText).addClass('check').removeClass('uncheck');
+				});
 			}
 			
 			// Aggiungi lettera al contatore
-			char_used += char;
+			char_used += baseChar;
 			$('.char-used').text('Lettere giocate: ' + char_used);
 			
 			// Controlla se hai vinto
 			if ($(".uncheck")[0] === undefined) {
 				setTimeout(function() {
+					playApplauseSound();
 					$('.guess-input').prop('disabled', true);
 					$('.guess-btn').prop('disabled', true);
 					$('.guess-feedback').addClass('success').text('✓ Parola completata! Hai vinto!');
@@ -210,19 +379,23 @@ $(document).ready(function() {
 			return;
 		}
 		
-		if (guess === cleanPhrase) {
+		// Normalizziamo gli accenti per garantire un confronto corretto (es. EREDITÀ === EREDITA)
+		var normGuess = normalizeAccents(guess);
+		var normCleanPhrase = normalizeAccents(cleanPhrase);
+		
+		if (normGuess === normCleanPhrase) {
 			// RISPOSTA CORRETTA!
 			$('.guess-input').removeClass('error');
 			$('.guess-feedback').addClass('success').text('✓ Esatto! Parola indovinata!');
 			
-			// Rivela tutte le lettere
+			// Rivela tutte le lettere con il loro carattere originale (incluso l'accento)
 			$('.letter-cell.uncheck').each(function() {
-				var classes = $(this).attr('class').split(' ');
-				var letter = classes[1]; // La lettera è sempre la seconda classe
+				var letter = $(this).data('char');
 				$(this).text(letter).addClass('check').removeClass('uncheck');
 			});
 			
 			// Genera coriandoli
+			playApplauseSound();
 			generateConfetti();
 			
 			// Disabilita input
@@ -230,6 +403,7 @@ $(document).ready(function() {
 			$('.guess-btn').prop('disabled', true);
 		} else {
 			// RISPOSTA SBAGLIATA!
+			playErrorSound();
 			$('.guess-input').addClass('error');
 			$('.guess-feedback').addClass('error').text('✗ Sbagliato! Continua a giocare...');
 			

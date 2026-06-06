@@ -79,6 +79,39 @@
         </div> <!-- /container -->
 	
 	<div class="confetti" id="confetti"></div>
+
+	<!-- Audio di sottofondo -->
+	<audio id="bg-music" src="sounds/Soundtrack_routa.mp3" loop></audio>
+
+	<!-- Effetti sonori -->
+	<audio id="success-sound" src="sounds/success_letter.mp3"></audio>
+	<audio id="error-sound" src="sounds/letter_error_sound.mp3"></audio>
+	<audio id="applause-sound" src="sounds/applause.mp3"></audio>
+
+	<!-- Controllo audio fluttuante con regolazione volume -->
+	<div class="music-control-container" id="musicControlContainer">
+		<div class="volume-slider-container">
+			<input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.05" value="0.5" title="Regola Volume" aria-label="Regola Volume">
+		</div>
+		<button class="music-control-btn" id="musicControlBtn" title="Attiva/Disattiva Musica" aria-label="Attiva/Disattiva Musica">
+			<svg class="music-icon play-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+				<path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+			</svg>
+			<svg class="music-icon mute-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+				<line x1="23" y1="9" x2="17" y2="15"></line>
+				<line x1="17" y1="9" x2="23" y2="15"></line>
+			</svg>
+			<span class="music-waves">
+				<span class="wave-bar bar-1"></span>
+				<span class="wave-bar bar-2"></span>
+				<span class="wave-bar bar-3"></span>
+				<span class="wave-bar bar-4"></span>
+			</span>
+		</button>
+	</div>
+
 <div id="phrase" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 <div class="modal-header">
 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
