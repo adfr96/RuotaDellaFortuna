@@ -155,6 +155,14 @@ $(document).ready(function () {
 	addPlayerField(0);
 	addPlayerField(1);
 
+	// Popola la select dei gruppi di frasi
+	if (typeof PHRASE_GROUPS !== 'undefined') {
+		var $groupSel = $('#phrase-group-select');
+		Object.keys(PHRASE_GROUPS).forEach(function (g) {
+			$groupSel.append($('<option>').val(g).text(g + ' (' + PHRASE_GROUPS[g].length + ')'));
+		});
+	}
+
 	$('#add-player-btn').click(function () {
 		var count = $('#players-setup-list .player-setup-row').length;
 		addPlayerField(count);
@@ -184,9 +192,15 @@ $(document).ready(function () {
 
 		$('#setup-error').hide();
 
-		// Inizializza la ruota e avvia il gioco
+		// Inizializza la ruota e avvia il gioco con il gruppo selezionato
+		var sel = $('#phrase-group-select').val();
+		var phrasesToUse = PHRASES;
+		if (sel && sel !== '__all__' && typeof PHRASE_GROUPS !== 'undefined' && PHRASE_GROUPS[sel]) {
+			phrasesToUse = PHRASE_GROUPS[sel];
+		}
+
 		Wheel.init('wheel-canvas');
-		Game.startGame(names);
+		Game.startGame(names, phrasesToUse);
 	});
 
 	// ============================================================

@@ -18,6 +18,7 @@ var Game = (function () {
 	var _state          = 'SETUP';
 	var _round          = 0;
 	var _phraseOrder    = [];   // indici di PHRASES in ordine casuale
+	var _phrasesList    = [];   // lista di frasi usata per la partita (può essere un gruppo)
 	var _currentPhrase  = '';
 	var _currentTheme   = '';
 	var _currentBonus   = 0;
@@ -55,9 +56,10 @@ var Game = (function () {
 	// ----------------------------------------------------------
 	// SETUP → inizio partita
 	// ----------------------------------------------------------
-	function startGame(playerNames) {
+	function startGame(playerNames, phraseList) {
 		Players.init(playerNames);
-		_phraseOrder = _shuffleArray(PHRASES.map(function (_, i) { return i; }));
+		_phrasesList = phraseList && phraseList.length ? phraseList : PHRASES;
+		_phraseOrder = _shuffleArray(_phrasesList.map(function (_, i) { return i; }));
 		_round = 0;
 
 		$('#setup-screen').hide();
@@ -82,7 +84,7 @@ var Game = (function () {
 		Players.resetRoundScores();
 
 		// Scegli frase (ciclica se i round superano le frasi disponibili)
-		var phraseData = PHRASES[_phraseOrder[(_round - 1) % _phraseOrder.length]];
+		var phraseData = _phrasesList[_phraseOrder[(_round - 1) % _phraseOrder.length]];
 		_currentPhrase = _normalizeAccents(phraseData.frase.toUpperCase().trim());
 		_currentTheme  = phraseData.tema  || '-';
 		_currentBonus  = phraseData.bonus || 0;
