@@ -76,6 +76,13 @@ Oppure:
 - Clicca con tasto destro → "Apri con Browser"
 - Trascina il file nel browser
 
+### Acquisto delle vocali
+
+- 🅥 **Compra Vocale** - Durante il tuo turno (quando hai ottenuto un premio dalla ruota) puoi acquistare una vocale usando il pulsante "Compra Vocale".
+- 💶 **Costo** - Ogni vocale costa **250 €** e l'importo viene scalato dal tuo punteggio di manche.
+- 🔒 **Regola** - Le vocali **non possono** essere giocate tramite l'input normale; devi usare il pulsante di acquisto. Se provi a inserire una vocale come lettera normale, il gioco mostrerà un avviso.
+- 🔎 **Effetto** - Se la vocale è presente nella frase, tutte le occorrenze vengono rivelate; se non è presente, perdi il turno.
+
 ### Durante il Gioco
 
 1. **Clicca su un tema** nella lista in basso per iniziare
@@ -263,6 +270,7 @@ const PHRASES = [
 - ✅ Contatore partite giocate
 - ✅ Contatore lettere giocate
 - ✅ Supporto caratteri accentati italiani
+ - ✅ Acquisto vocali: pulsante "Compra Vocale" (250 €). Le vocali non possono essere giocate come lettere normali.
 
 ### Possibili Miglioramenti Futuri
 - [ ] Vite/tentativi limitati (level di difficoltà)
@@ -284,6 +292,6 @@ Vedi il file [LICENSE](LICENSE)
 
 ---
 
-**Ultimo aggiornamento:** 17 Aprile 2026 - Versione 2.0
+**Ultimo aggiornamento:** 8 Giugno 2026 - Versione 2.1
 
 
