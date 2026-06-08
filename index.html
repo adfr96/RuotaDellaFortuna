@@ -1,145 +1,219 @@
 <!DOCTYPE html>
-<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<html class="no-js" lang="it">
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title></title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width">
+        <title>La Ruota della Fortuna</title>
+        <meta name="description" content="Gioco La Ruota della Fortuna – multiplayer, con ruota animata, montepremi e manche.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <link rel="stylesheet" href="css/bootstrap.min.css">
-        <style>
-            body {
-                padding-top: 60px;
-                padding-bottom: 40px;
-            }
-        </style>
-        <link rel="stylesheet" href="css/bootstrap-responsive.min.css">
         <link rel="stylesheet" href="css/main.css">
 
-        <!--[if lt IE 9]>
-            <script src="js/vendor/html5-3.6-respond-1.1.0.min.js"></script>
-        <![endif]-->
+        <style>
+            body { padding-top: 60px; padding-bottom: 40px; }
+        </style>
     </head>
     <body>
-        <!--[if lt IE 7]>
-            <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
-        <![endif]-->
 
-        <!-- This code is taken from http://twitter.github.com/bootstrap/examples/hero.html -->
-
+        <!-- ==================== NAVBAR ==================== -->
         <div class="navbar navbar-inverse navbar-fixed-top">
             <div class="navbar-inner">
                 <div class="container">
-                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </a>
-                    <a class="brand" href="#">Ruota della fortuna</a>
-                    <div class="nav-collapse collapse">
-                        <ul class="nav">
-                            <li class="new-phrase input-large"><a href="#">Nuova Frase</a></li>
-                        </ul>
-                    </div><!--/.nav-collapse -->
+                    <a class="brand" href="#">🎡 La Ruota della Fortuna</a>
                 </div>
             </div>
         </div>
 
-        <div class="container">
+        <!-- ==================== SETUP SCREEN ==================== -->
+        <div id="setup-screen" class="container">
+            <div class="setup-hero">
+                <h1 class="setup-title">🎡 La Ruota della Fortuna</h1>
+                <p class="setup-subtitle">Inserisci i nomi dei giocatori per iniziare la partita</p>
 
-            <!-- Main hero unit for a primary marketing message or call to action -->
-            <div class="hero-unit tabbellone">
+                <div class="setup-card">
+                    <div id="players-setup-list">
+                        <!-- Campi giocatori generati dinamicamente -->
+                    </div>
 
+                    <button id="add-player-btn" class="btn-add-player">+ Aggiungi Giocatore</button>
+
+                    <div class="setup-info">
+                        <span class="setup-rounds-info">La partita si svolge in <strong>3 manche</strong>.</span>
+                    </div>
+
+                    <button id="start-game-btn" class="btn-start-game">🎡 Inizia la Partita!</button>
+                    <div id="setup-error" class="setup-error"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== GAME SCREEN ==================== -->
+        <div id="game-screen" class="container" style="display:none;">
+
+            <!-- Players Panel -->
+            <div id="players-panel">
+                <!-- Generato da players.js -->
             </div>
 
-	<div class="theme-display">
-		<span class="theme-label">TEMA: </span>
-		<span class="theme-value">-</span>
-	</div>
-
-	 <div class="hero-unit">
-		<span class="game"> </span><br>
-		<span class="char-used"> </span>
-		<div class="guess-section">
-			<input type="text" class="guess-input" placeholder="Indovina la parola intera...">
-			<button class="btn btn-primary guess-btn">Indovina!</button>
-			<span class="guess-feedback"></span>
-		</div>
+            <!-- Turn & Round Info Bar -->
+            <div id="info-bar">
+                <span id="turn-indicator">Turno di: <strong id="current-player-name">-</strong></span>
+                <span id="round-info">Manche 1 di 3</span>
+                <span id="phrase-theme">TEMA: -</span>
+                <span id="phrase-bonus" style="display:none;"></span>
             </div>
 
-	<div class="hero-unit themes-section">
-		<h4>Scegli un tema:</h4>
-		<div class="themes-list" id="themesList">
-		</div>
-	</div>
-        </div> <!-- /container -->
-	
-	<div class="confetti" id="confetti"></div>
+            <!-- Turn Banner -->
+            <div id="turn-banner" class="info" style="display:none;"></div>
 
-	<!-- Audio di sottofondo -->
-	<audio id="bg-music" src="sounds/Soundtrack_routa.mp3" loop></audio>
+            <!-- Main Game Layout -->
+            <div id="main-game-layout">
 
-	<!-- Effetti sonori -->
-	<audio id="success-sound" src="sounds/success_letter.mp3"></audio>
-	<audio id="error-sound" src="sounds/letter_error_sound.mp3"></audio>
-	<audio id="applause-sound" src="sounds/applause.mp3"></audio>
+                <!-- LEFT: Ruota (nascosta — popup overlay) -->
+                <div id="wheel-section">
+                    <div id="wheel-wrapper" style="display:none;">
+                            <div class="wheel-popup">
+                                <button id="wheel-close-btn" class="wheel-close" aria-label="Chiudi">✕</button>
+                                <canvas id="wheel-canvas" width="340" height="340"></canvas>
+                                <div id="wheel-popup-result" class="wheel-popup-result" style="display:none;"></div>
+                            </div>
+                        </div>
+                    <div id="wheel-result-banner" style="display:none;"></div>
+                </div>
 
-	<!-- Controllo audio fluttuante con regolazione volume -->
-	<div class="music-control-container" id="musicControlContainer">
-		<div class="volume-slider-container">
-			<input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.05" value="0.5" title="Regola Volume" aria-label="Regola Volume">
-		</div>
-		<button class="music-control-btn" id="musicControlBtn" title="Attiva/Disattiva Musica" aria-label="Attiva/Disattiva Musica">
-			<svg class="music-icon play-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-				<path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-			</svg>
-			<svg class="music-icon mute-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-				<line x1="23" y1="9" x2="17" y2="15"></line>
-				<line x1="17" y1="9" x2="23" y2="15"></line>
-			</svg>
-			<span class="music-waves">
-				<span class="wave-bar bar-1"></span>
-				<span class="wave-bar bar-2"></span>
-				<span class="wave-bar bar-3"></span>
-				<span class="wave-bar bar-4"></span>
-			</span>
-		</button>
-	</div>
+                <!-- RIGHT: Tabellone + Interazione -->
+                <div id="board-section">
+                    <!-- Pulsanti azione (sopra il tabellone) -->
+                    <div id="game-actions">
+                        <button id="spin-btn" class="btn-spin">🎡 Gira la Ruota!</button>
+                        <button id="solve-btn" class="btn-solve">💬 Soluzione</button>
+                        <button id="buy-vowel-btn" class="btn-buy-vowel">🅥 Compra Vocale</button>
+                    </div>
 
-<div id="phrase" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-<div class="modal-header">
-<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-<h3 id="myModalLabel">Inserisci una nuova frase</h3>
-</div>
-<div class="modal-body">
-<div class="phrase-creator">
-	<label>Nuova frase:</label>
-	<div class="input-group">
-		<input type="text" placeholder="Inserisci la frase" class="parse-me">
-	</div>
-	<label>Tema:</label>
-	<div class="input-group">
-		<input type="text" placeholder="Es: Film, Canzoni, Persone..." class="phrase-theme">
-	</div>
-</div>
-</div>
-<div class="modal-footer">
-<button class="btn" data-dismiss="modal" aria-hidden="true">Annulla</button>
-<button class="btn btn-primary go">Gioca!</button>
-</div>
-</div>
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
-        <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.9.0.min.js"><\/script>')</script>
+                    <!-- Tabellone lettere -->
+                    <div class="tabbellone"></div>
 
+                    <!-- Box Tema (più evidente) -->
+                    <div id="theme-box" style="display:none;">
+                        <span class="theme-box-value">-</span>
+                    </div>
+
+                    <!-- Lettere usate -->
+                    <div id="char-used-display" class="char-used">Lettere giocate: </div>
+
+                    <!-- Input lettera (mostrato dopo spicchio premio) -->
+                    <div id="letter-input-area" style="display:none;">
+                        <div class="input-group-game">
+                            <input type="text" id="letter-input" maxlength="1"
+                                   placeholder="Es. A" autocomplete="off"
+                                   class="game-text-input letter-only">
+                            <button id="guess-letter-btn" class="btn-confirm">Conferma</button>
+                        </div>
+                        <p class="input-hint">Inserisci una lettera e premi Conferma</p>
+                    </div>
+
+                    <!-- Input acquisto vocale -->
+                    <div id="vowel-input-area" style="display:none;">
+                        <div class="input-group-game">
+                            <input type="text" id="vowel-input" maxlength="1"
+                                   placeholder="Es. A" autocomplete="off"
+                                   class="game-text-input letter-only">
+                            <button id="buy-vowel-confirm-btn" class="btn-confirm">Compra</button>
+                            <button id="buy-vowel-cancel-btn" class="btn-cancel">✕ Annulla</button>
+                        </div>
+                        <p class="input-hint">Le vocali costano <strong>250 €</strong>. Inserisci la vocale da acquistare.</p>
+                    </div>
+
+                    <!-- Input soluzione intera -->
+                    <div id="solve-input-area" style="display:none;">
+                        <div class="input-group-game">
+                            <input type="text" id="solve-input"
+                                   placeholder="Scrivi la soluzione completa..."
+                                   autocomplete="off"
+                                   class="game-text-input">
+                            <button id="confirm-solve-btn" class="btn-confirm">✓ Conferma</button>
+                            <button id="cancel-solve-btn" class="btn-cancel">✕ Annulla</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /main-game-layout -->
+
+        </div><!-- /game-screen -->
+
+        <!-- ==================== ROUND END OVERLAY ==================== -->
+        <div id="round-end-overlay" style="display:none;">
+            <div class="round-end-card">
+                <div class="round-end-emoji">🎉</div>
+                <h2>Manche completata!</h2>
+                <p>Ha vinto: <strong id="round-winner-name">-</strong></p>
+                <div class="round-end-actions">
+                    <button id="next-round-btn" class="btn-start-game">Prossima Manche →</button>
+                    <button id="end-game-btn" class="btn-start-game" style="display:none;">🏆 Vedi Classifica</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== ENDGAME SCREEN ==================== -->
+        <div id="endgame-screen" class="container" style="display:none;">
+            <div class="endgame-hero">
+                <div class="trophy-icon">🏆</div>
+                <h1>Fine Partita!</h1>
+                <p class="winner-announce">Ha vinto: <strong id="winner-name">-</strong></p>
+                <div id="final-leaderboard"></div>
+                <button id="play-again-btn" class="btn-start-game">🔄 Gioca Ancora</button>
+            </div>
+        </div>
+
+        <!-- Coriandoli -->
+        <div class="confetti" id="confetti"></div>
+
+        <!-- Audio -->
+        <audio id="bg-music"      src="sounds/Soundtrack_routa.mp3" loop></audio>
+        <audio id="success-sound" src="sounds/success_letter.mp3"></audio>
+        <audio id="error-sound"   src="sounds/letter_error_sound.mp3"></audio>
+        <audio id="applause-sound" src="sounds/applause.mp3"></audio>
+        <!-- Suono ruota -->
+        <audio id="spin-sound"    src="sounds/spin.mp3"></audio>
+
+        <!-- Controllo audio fluttuante -->
+        <div class="music-control-container" id="musicControlContainer">
+            <div class="volume-slider-container">
+                <input type="range" class="volume-slider" id="volumeSlider"
+                       min="0" max="1" step="0.05" value="0.5"
+                       title="Regola Volume" aria-label="Regola Volume">
+            </div>
+            <button class="music-control-btn" id="musicControlBtn"
+                    title="Attiva/Disattiva Musica" aria-label="Attiva/Disattiva Musica">
+                <svg class="music-icon play-icon" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                </svg>
+                <svg class="music-icon mute-icon" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <line x1="23" y1="9" x2="17" y2="15"></line>
+                    <line x1="17" y1="9" x2="23" y2="15"></line>
+                </svg>
+                <span class="music-waves">
+                    <span class="wave-bar bar-1"></span>
+                    <span class="wave-bar bar-2"></span>
+                    <span class="wave-bar bar-3"></span>
+                    <span class="wave-bar bar-4"></span>
+                </span>
+            </button>
+        </div>
+
+        <!-- Scripts -->
+        <script src="js/vendor/jquery-1.9.0.min.js"></script>
         <script src="js/vendor/bootstrap.min.js"></script>
-
         <script src="js/phrases.js"></script>
+        <script src="js/wheel.js"></script>
+        <script src="js/players.js"></script>
+        <script src="js/game.js"></script>
         <script src="js/main.js"></script>
+
     </body>
 </html>

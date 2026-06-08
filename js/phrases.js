@@ -1,19 +1,24 @@
-// Frasi da indovinare - Modifica questo array per aggiungere nuove frasi
+// Frasi da indovinare
+// Ogni frase ha: frase (testo), tema (categoria), bonus (premio fisso in € per chi risolve)
 const PHRASES = [
 	{
 		"frase": "LA RUOTA DELLA FORTUNA",
-		"tema": "Game Show"
+		"tema": "Game Show",
+		"bonus": 500
 	},
 	{
-		"frase": "Ale è un programmatore java",
-		"tema": "adfr96"
+		"frase": "ALE E UN PROGRAMMATORE JAVA",
+		"tema": "adfr96",
+		"bonus": 300
 	},
 	{
-		"frase": "bloccare la propria carta di credito per un acquisto a san francisco",
-		"tema": "gaia confusa"
+		"frase": "BLOCCARE LA PROPRIA CARTA DI CREDITO PER UN ACQUISTO A SAN FRANCISCO",
+		"tema": "Gaia confusa",
+		"bonus": 1000
 	},
 	{
 		"frase": "BUONA FORTUNA GIOCATORE",
-		"tema": "Generale"
+		"tema": "Generale",
+		"bonus": 400
 	}
 ];
