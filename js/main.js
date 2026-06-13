@@ -155,6 +155,29 @@ $(document).ready(function () {
 	addPlayerField(0);
 	addPlayerField(1);
 
+	// Popola la select dei gruppi di giocatori
+	if (typeof PLAYER_GROUPS !== 'undefined') {
+		var $playerGroupSel = $('#players-group-select');
+		Object.keys(PLAYER_GROUPS).forEach(function (g) {
+			$playerGroupSel.append($('<option>').val(g).text(g + ' (' + PLAYER_GROUPS[g].length + ')'));
+		});
+	}
+
+	// Carica giocatori da gruppo selezionato
+	$('#players-group-select').on('change', function () {
+		var sel = $(this).val();
+		if (sel === '__manual__' || !sel) return;
+
+		if (typeof PLAYER_GROUPS !== 'undefined' && PLAYER_GROUPS[sel]) {
+			// Pulisci lista
+			$('#players-setup-list').empty();
+			// Popola con i giocatori del gruppo
+			PLAYER_GROUPS[sel].forEach(function (name, index) {
+				addPlayerField(index, name);
+			});
+		}
+	});
+
 	// Popola la select dei gruppi di frasi
 	if (typeof PHRASE_GROUPS !== 'undefined') {
 		var $groupSel = $('#phrase-group-select');
@@ -195,12 +218,21 @@ $(document).ready(function () {
 		// Inizializza la ruota e avvia il gioco con il gruppo selezionato
 		var sel = $('#phrase-group-select').val();
 		var phrasesToUse = PHRASES;
-		if (sel && sel !== '__all__' && typeof PHRASE_GROUPS !== 'undefined' && PHRASE_GROUPS[sel]) {
-			phrasesToUse = PHRASE_GROUPS[sel];
+		var groupName = 'Tutti i gruppi';
+	
+	if (sel && sel !== '__all__' && typeof PHRASE_GROUPS !== 'undefined' && PHRASE_GROUPS[sel]) {
+		// Singolo gruppo selezionato
+		phrasesToUse = PHRASE_GROUPS[sel];
+		groupName = sel;
+	} else if (sel === '__all__') {
+		// Tutti i gruppi in sequenza
+		var groupNames = Object.keys(PHRASE_GROUPS);
+		phrasesToUse = groupNames; // passa l'array di nomi di gruppi
+		groupName = '__ALL_GROUPS__'; // flag speciale
 		}
 
 		Wheel.init('wheel-canvas');
-		Game.startGame(names, phrasesToUse);
+		Game.startGame(names, phrasesToUse, groupName);
 	});
 
 	// ============================================================

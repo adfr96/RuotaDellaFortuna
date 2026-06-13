@@ -6,28 +6,58 @@ var Wheel = (function () {
 
 	// ----------------------------------------------------------
 	// Spicchi della ruota (configurabili)
+	// width: larghezza relativa dello spicchio (più alto = più largo)
 	// ----------------------------------------------------------
 	var SLICES = [
-		{ label: '500€',        type: 'prize',    value: 500,  color: '#ff5c8a', textColor: '#fff' },
-		{ label: 'PASSA',       type: 'pass',     value: 0,    color: '#9e9eb8', textColor: '#fff' },
-		{ label: '200€',        type: 'prize',    value: 200,  color: '#ffb3c6', textColor: '#5a0020' },
-		{ label: 'BANCAROTTA',  type: 'bankrupt', value: 0,    color: '#2d1833', textColor: '#ff5c8a' },
-		{ label: '800€',        type: 'prize',    value: 800,  color: '#e03a64', textColor: '#fff' },
-		{ label: '300€',        type: 'prize',    value: 300,  color: '#ffd6e0', textColor: '#5a0020' },
-		{ label: 'PASSA',       type: 'pass',     value: 0,    color: '#9e9eb8', textColor: '#fff' },
-		{ label: '1000€',       type: 'prize',    value: 1000, color: '#c9184a', textColor: '#fff' },
-		{ label: '150€',        type: 'prize',    value: 150,  color: '#ff85a2', textColor: '#5a0020' },
-		{ label: 'BANCAROTTA',  type: 'bankrupt', value: 0,    color: '#1a0a1e', textColor: '#ff5c8a' },
-		{ label: '600€',        type: 'prize',    value: 600,  color: '#ff5c8a', textColor: '#fff' },
-		{ label: '400€',        type: 'prize',    value: 400,  color: '#ff9ab2', textColor: '#5a0020' },
+		{ label: '500€',        type: 'prize',    value: 500,  color: '#ff5c8a', textColor: '#fff', width: 0.8 },
+		{ label: 'PASSA',       type: 'pass',     value: 0,    color: '#9e9eb8', textColor: '#fff', width: 1 },
+		{ label: 'Foto con Gaia (200€)', type: 'prize',    value: 200,  color: '#ffb3c6', textColor: '#5a0020', width: 1.2 },
+		{ label: 'BANCAROTTA',  type: 'bankrupt', value: 0,    color: '#2d1833', textColor: '#ff5c8a', width: 0.6 },
+		{ label: '800€',        type: 'prize',    value: 800,  color: '#e03a64', textColor: '#fff', width: 0.5 },
+		{ label: '300€',        type: 'prize',    value: 300,  color: '#ffd6e0', textColor: '#5a0020', width: 1.0 },
+		{ label: '600€',        type: 'prize',    value: 600,  color: '#ff5c8a', textColor: '#fff', width: 0.7 },
+		{ label: 'PASSA',       type: 'pass',     value: 0,    color: '#9e9eb8', textColor: '#fff', width: 1 },
+		{ label: 'Bacio di Gaia (350€)',        type: 'prize',    value: 350,  color: '#ff85a2', textColor: '#5a0020', width: 1.3 },
+		{ label: '150€',        type: 'prize',    value: 150,  color: '#ffd6e0', textColor: '#5a0020', width: 1.0 },
+		{ label: '250€',        type: 'prize',    value: 250,  color: '#ffd6e0', textColor: '#5a0020', width: 1.0 },
+		{ label: 'BANCAROTTA',  type: 'bankrupt', value: 0,    color: '#1a0a1e', textColor: '#ff5c8a', width: 0.7 },
+		{ label: '1000€',       type: 'prize',    value: 1000, color: '#c9184a', textColor: '#fff', width: 0.4 },
+		{ label: 'BANCAROTTA',  type: 'bankrupt', value: 0,    color: '#1a0a1e', textColor: '#ff5c8a', width: 0.7 },
+		{ label: '400€',        type: 'prize',    value: 400,  color: '#ff9ab2', textColor: '#5a0020', width: 0.9 },
+		{ label: '200€',        type: 'prize',    value: 400,  color: '#ff9ab2', textColor: '#5a0020', width: 0.9 },
+		{ label: 'PASSA',       type: 'pass',     value: 0,    color: '#9e9eb8', textColor: '#fff', width: 1 },
+		{ label: 'Fai un passo di salsa (800€)',        type: 'prize',    value: 800,  color: '#ff9ab2', textColor: '#5a0020', width: 0.7 }
+		,{ label: '400€',        type: 'prize',    value: 400,  color: '#ff9ab2', textColor: '#5a0020', width: 0.9 }
 	];
 
 	var canvas, ctx;
 	var currentAngle = 0;        // angolo corrente in radianti
 	var isSpinning   = false;
+	var sliceAngles  = [];        // angoli calcolati per ogni spicchio
 
 	// Angolo puntatore: il puntatore è fisso in cima (angolo 270° = -Math.PI/2)
 	var POINTER_ANGLE = -Math.PI / 2;
+
+	// ----------------------------------------------------------
+	// Calcola gli angoli degli spicchi basandosi sui pesi
+	// ----------------------------------------------------------
+	function _calculateSliceAngles() {
+		sliceAngles = [];
+		var totalWeight = 0;
+
+		// Somma tutti i pesi
+		SLICES.forEach(function (slice) {
+			totalWeight += (slice.width || 1);
+		});
+
+		// Calcola l'angolo di ogni spicchio proporzionalmente al peso
+		var currentAngle = 0;
+		SLICES.forEach(function (slice) {
+			var angle = (slice.width || 1) / totalWeight * 2 * Math.PI;
+			sliceAngles.push({ start: currentAngle, end: currentAngle + angle });
+			currentAngle += angle;
+		});
+	}
 
 	// ----------------------------------------------------------
 	// Init
@@ -36,6 +66,7 @@ var Wheel = (function () {
 		canvas = document.getElementById(canvasId);
 		if (!canvas) { console.error('Wheel: canvas non trovato:', canvasId); return; }
 		ctx = canvas.getContext('2d');
+		_calculateSliceAngles(); // calcola gli angoli basati sui pesi
 		draw();
 	}
 
@@ -52,12 +83,12 @@ var Wheel = (function () {
 
 		ctx.clearRect(0, 0, W, H);
 
-		var sliceAngle = (2 * Math.PI) / SLICES.length;
-
 		// --- Disegna ogni spicchio ---
 		SLICES.forEach(function (slice, i) {
-			var startAngle = currentAngle + i * sliceAngle;
-			var endAngle   = startAngle + sliceAngle;
+			if (!sliceAngles[i]) return;
+			var startAngle = currentAngle + sliceAngles[i].start;
+			var endAngle   = currentAngle + sliceAngles[i].end;
+			var midAngle   = startAngle + (endAngle - startAngle) / 2;
 
 			// Riempimento
 			ctx.beginPath();
@@ -75,7 +106,7 @@ var Wheel = (function () {
 			// Testo
 			ctx.save();
 			ctx.translate(cx, cy);
-			ctx.rotate(startAngle + sliceAngle / 2);
+			ctx.rotate(midAngle);
 			ctx.textAlign = 'right';
 			ctx.fillStyle = slice.textColor;
 
@@ -143,11 +174,18 @@ var Wheel = (function () {
 	// Calcola lo spicchio puntato dall'angolo corrente
 	// ----------------------------------------------------------
 	function _getPointedSlice() {
-		var sliceAngle = (2 * Math.PI) / SLICES.length;
 		// Normalizza l'angolo corrente rispetto al puntatore
 		var normalizedAngle = ((POINTER_ANGLE - currentAngle) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
-		var index = Math.floor(normalizedAngle / sliceAngle) % SLICES.length;
-		return SLICES[index];
+		
+		// Trova quale spicchio contiene questo angolo
+		for (var i = 0; i < sliceAngles.length; i++) {
+			if (normalizedAngle >= sliceAngles[i].start && normalizedAngle < sliceAngles[i].end) {
+				return SLICES[i];
+			}
+		}
+		
+		// Fallback (shouldn't happen)
+		return SLICES[0];
 	}
 
 	// ----------------------------------------------------------

@@ -32,6 +32,14 @@
                 <p class="setup-subtitle">Inserisci i nomi dei giocatori per iniziare la partita</p>
 
                 <div class="setup-card">
+                    <!-- Selezione gruppo di giocatori -->
+                    <div class="group-select">
+                        <label for="players-group-select">Scegli gruppo giocatori:</label>
+                        <select id="players-group-select">
+                            <option value="__manual__">Inserisci manualmente</option>
+                        </select>
+                    </div>
+
                     <div id="players-setup-list">
                         <!-- Campi giocatori generati dinamicamente -->
                     </div>
@@ -45,10 +53,6 @@
                     	</div>
 
                     <button id="add-player-btn" class="btn-add-player">+ Aggiungi Giocatore</button>
-
-                    <div class="setup-info">
-                        <span class="setup-rounds-info">La partita si svolge in <strong>3 manche</strong>.</span>
-                    </div>
 
                     <button id="start-game-btn" class="btn-start-game">🎡 Inizia la Partita!</button>
                     <div id="setup-error" class="setup-error"></div>
@@ -99,11 +103,18 @@
                         <button id="buy-vowel-btn" class="btn-buy-vowel">🅥 Compra Vocale</button>
                     </div>
 
+                    <!-- Box Gruppo di Frasi (grande e visibile) -->
+                    <div id="group-box" style="display:none;">
+                        <span class="group-box-label">📚 GRUPPO</span>
+                        <span class="group-box-value">-</span>
+                    </div>
+
                     <!-- Tabellone lettere -->
                     <div class="tabbellone"></div>
 
-                    <!-- Box Tema (più evidente) -->
+                    <!-- Box Tema (grande e visibile) -->
                     <div id="theme-box" style="display:none;">
+                        <span class="theme-box-label">🎭 TEMA</span>
                         <span class="theme-box-value">-</span>
                     </div>
 
@@ -217,6 +228,7 @@
         <!-- Scripts -->
         <script src="js/vendor/jquery-1.9.0.min.js"></script>
         <script src="js/vendor/bootstrap.min.js"></script>
+        <script src="js/players_groups.js"></script>
         <script src="js/phrases.js"></script>
         <script src="js/wheel.js"></script>
         <script src="js/players.js"></script>

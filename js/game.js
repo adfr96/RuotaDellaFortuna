@@ -19,11 +19,17 @@ var Game = (function () {
 	var _round          = 0;
 	var _phraseOrder    = [];   // indici di PHRASES in ordine casuale
 	var _phrasesList    = [];   // lista di frasi usata per la partita (può essere un gruppo)
-	var _currentPhrase  = '';
+	var _groupName      = '';   // nome del gruppo di frasi selezionato
+	var _currentPhrase  = '';   // frase normalizzata (senza accenti, per il matching)
+	var _currentPhraseOriginal = ''; // frase originale (con accenti, per il rendering)
 	var _currentTheme   = '';
 	var _currentBonus   = 0;
 	var _usedLetters    = [];   // lettere base già giocate (normalizzate)
 	var _lastSpinValue  = 0;    // valore dello spicchio corrente
+	
+	// Supporto per sequenza di gruppi
+	var _allGroups      = null; // array di nomi di gruppi (null se singolo gruppo)
+	var _currentGroupIdx = 0;   // indice gruppo corrente nella sequenza
 
 	// ----------------------------------------------------------
 	// Utility condivise
@@ -56,10 +62,23 @@ var Game = (function () {
 	// ----------------------------------------------------------
 	// SETUP → inizio partita
 	// ----------------------------------------------------------
-	function startGame(playerNames, phraseList) {
+	function startGame(playerNames, phraseList, groupName) {
 		Players.init(playerNames);
-		_phrasesList = phraseList && phraseList.length ? phraseList : PHRASES;
-		_phraseOrder = _shuffleArray(_phrasesList.map(function (_, i) { return i; }));
+		
+		// Controlla se phraseList è un array di nomi di gruppi (sequenza)
+		if (groupName === '__ALL_GROUPS__' && Array.isArray(phraseList) && phraseList.length > 0 && typeof phraseList[0] === 'string') {
+			// Sequenza di gruppi
+			_allGroups = phraseList;
+			_currentGroupIdx = 0;
+			_loadNextGroup();
+		} else {
+			// Singolo gruppo
+			_allGroups = null;
+			_phrasesList = phraseList && phraseList.length ? phraseList : PHRASES;
+			_groupName = groupName || 'Tutti i gruppi';
+			_initRound();
+		}
+		
 		_round = 0;
 
 		$('#setup-screen').hide();
@@ -67,6 +86,30 @@ var Game = (function () {
 		$('#game-screen').show();
 
 		startRound();
+	}
+	
+	// ----------------------------------------------------------
+	// Carica il prossimo gruppo dalla sequenza
+	// ----------------------------------------------------------
+	function _loadNextGroup() {
+		if (!_allGroups || _currentGroupIdx >= _allGroups.length) {
+			_endGame();
+			return;
+		}
+		
+		var groupName = _allGroups[_currentGroupIdx];
+		_phrasesList = PHRASE_GROUPS[groupName] || [];
+		_groupName = groupName;
+		_currentGroupIdx++;
+		_initRound();
+	}
+	
+	// ----------------------------------------------------------
+	// Inizializza stato per un gruppo/lista di frasi
+	// ----------------------------------------------------------
+	function _initRound() {
+		_phraseOrder = _shuffleArray(_phrasesList.map(function (_, i) { return i; }));
+		_round = 0;
 	}
 
 	// ----------------------------------------------------------
@@ -76,8 +119,17 @@ var Game = (function () {
 		_round++;
 
 		if (_round > TOTAL_ROUNDS) {
-			_endGame();
-			return;
+			// Fine manche di questo gruppo
+			if (_allGroups) {
+				// Se stiamo giocando una sequenza, carica il prossimo gruppo
+				_loadNextGroup();
+				_round++; // Re-incrementa perché _loadNextGroup() resetta _round a 0
+				// Continua a inizializzare la nuova manche (NON fare return)
+			} else {
+				// Altrimenti finisci la partita
+				_endGame();
+				return;
+			}
 		}
 
 		// Reset punteggi di manche
@@ -85,7 +137,8 @@ var Game = (function () {
 
 		// Scegli frase (ciclica se i round superano le frasi disponibili)
 		var phraseData = _phrasesList[_phraseOrder[(_round - 1) % _phraseOrder.length]];
-		_currentPhrase = _normalizeAccents(phraseData.frase.toUpperCase().trim());
+		_currentPhraseOriginal = phraseData.frase.toUpperCase().trim(); // conserva accenti
+		_currentPhrase = _normalizeAccents(_currentPhraseOriginal); // normalizza per il matching
 		_currentTheme  = phraseData.tema  || '-';
 		_currentBonus  = phraseData.bonus || 0;
 		_usedLetters   = [];
@@ -93,6 +146,11 @@ var Game = (function () {
 		// Aggiorna UI testuale
 		$('#round-info').text('Manche ' + _round + ' di ' + TOTAL_ROUNDS);
 		$('#phrase-theme').text('TEMA: ' + _currentTheme);
+		
+		// Mostra box gruppo
+		$('#group-box .group-box-value').text(_groupName);
+		$('#group-box').show();
+		
 		// Mostra box tema sotto il tabellone
 		$('#theme-box .theme-box-value').text(_currentTheme);
 		$('#theme-box').show();
@@ -103,8 +161,8 @@ var Game = (function () {
 		}
 		$('#char-used-display').text('Lettere giocate: ');
 
-		// Renderizza il tabellone
-		_renderBoard(_currentPhrase);
+		// Renderizza il tabellone (passa sia la versione originale che quella normalizzata)
+		_renderBoard(_currentPhraseOriginal, _currentPhrase);
 
 		// Chiudi overlay manche precedente
 		$('#round-end-overlay').hide();
@@ -389,9 +447,15 @@ $(document).on('click', '#wheel-close-btn', function () {
 		// Mostra overlay
 		$('#round-winner-name').text(winner.name);
 		if (_round < TOTAL_ROUNDS) {
-			$('#next-round-btn').show();
+			// Ancora manche in questo gruppo
+			$('#next-round-btn').text('Prossima Manche →').show();
+			$('#end-game-btn').hide();
+		} else if (_allGroups && _currentGroupIdx < _allGroups.length) {
+			// Prossimo gruppo disponibile
+			$('#next-round-btn').text('Prossimo Gruppo →').show();
 			$('#end-game-btn').hide();
 		} else {
+			// Fine partita
 			$('#next-round-btn').hide();
 			$('#end-game-btn').show();
 		}
@@ -437,31 +501,41 @@ $(document).on('click', '#wheel-close-btn', function () {
 	// ----------------------------------------------------------
 	// Rendering del tabellone
 	// ----------------------------------------------------------
-	function _renderBoard(normalizedPhrase) {
+	function _renderBoard(originalPhrase, normalizedPhrase) {
 		var $board = $('.tabbellone');
 		$board.empty();
 
-		// La frase è già normalizzata; manteniamo la versione originale per display
-		var originalPhrase = normalizedPhrase; // già in maiuscolo, accenti rimossi dalla frase
-		var chars = originalPhrase.split('');
-
+		// Suddividi in parole
+		var origChars = originalPhrase.split('');
+		var normChars = normalizedPhrase.split('');
 		var words = [];
 		var currentWord = [];
-		chars.forEach(function (ch) {
-			if (ch === ' ') {
+
+		for (var i = 0; i < origChars.length; i++) {
+			var origCh = origChars[i];
+			var normCh = normChars[i];
+			if (origCh === ' ') {
 				if (currentWord.length > 0) { words.push(currentWord); currentWord = []; }
-			} else if (/[A-Z]/.test(ch)) {
-				currentWord.push(ch);
+			} else {
+				currentWord.push({ orig: origCh, norm: normCh });
 			}
-		});
+		}
 		if (currentWord.length > 0) words.push(currentWord);
 
 		words.forEach(function (word) {
 			var $wordCont = $('<span class="word-container"></span>');
-			word.forEach(function (ch) {
-				var $cell = $('<span class="letter-cell ' + ch + ' uncheck">_</span>');
-				$cell.data('char', ch);
-				$wordCont.append($cell);
+			word.forEach(function (item) {
+				if (/[A-Z]/.test(item.norm)) {
+					// È una lettera
+					var $cell = $('<span class="letter-cell ' + item.norm + ' uncheck">_</span>');
+					$cell.data('char', item.orig); // salva il carattere originale con accento
+					$cell.data('norm', item.norm); // salva la versione normalizzata
+					$wordCont.append($cell);
+				} else {
+					// È un segno di punteggiatura
+					var $cell = $('<span class="letter-cell punctuation-cell check">' + _escapeHtml(item.orig) + '</span>');
+					$wordCont.append($cell);
+				}
 			});
 			$board.append($wordCont);
 		});
