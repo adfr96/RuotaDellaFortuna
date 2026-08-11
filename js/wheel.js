@@ -9,25 +9,25 @@ var Wheel = (function () {
 	// width: larghezza relativa dello spicchio (più alto = più largo)
 	// ----------------------------------------------------------
 	var SLICES = [
-		{ label: '500€',        type: 'prize',    value: 500,  color: '#ff5c8a', textColor: '#fff', width: 0.8 },
+		{ label: '500€',        type: 'prize',    value: 500,  color: '#e53935', textColor: '#fff', width: 0.8 },
 		{ label: 'PASSA',       type: 'pass',     value: 0,    color: '#9e9eb8', textColor: '#fff', width: 1 },
-		{ label: 'Foto con Gaia (200€)', type: 'prize',    value: 200,  color: '#ffb3c6', textColor: '#5a0020', width: 1.2 },
-		{ label: 'BANCAROTTA',  type: 'bankrupt', value: 0,    color: '#2d1833', textColor: '#ff5c8a', width: 0.6 },
-		{ label: '800€',        type: 'prize',    value: 800,  color: '#e03a64', textColor: '#fff', width: 0.5 },
-		{ label: '300€',        type: 'prize',    value: 300,  color: '#ffd6e0', textColor: '#5a0020', width: 1.0 },
-		{ label: '600€',        type: 'prize',    value: 600,  color: '#ff5c8a', textColor: '#fff', width: 0.7 },
+		{ label: 'Foto con Gaia (200€)', type: 'prize',    value: 200,  color: '#ffea00', textColor: '#4a2c0f', width: 1.2 },
+		{ label: 'BANCAROTTA',  type: 'bankrupt', value: 0,    color: '#1a0a02', textColor: '#ffea00', width: 0.6 },
+		{ label: '800€',        type: 'prize',    value: 800,  color: '#b71c1c', textColor: '#fff', width: 0.5 },
+		{ label: '300€',        type: 'prize',    value: 300,  color: '#ffd54f', textColor: '#4a2c0f', width: 1.0 },
+		{ label: '600€',        type: 'prize',    value: 600,  color: '#e53935', textColor: '#fff', width: 0.7 },
 		{ label: 'PASSA',       type: 'pass',     value: 0,    color: '#9e9eb8', textColor: '#fff', width: 1 },
-		{ label: 'Bacio di Gaia (350€)',        type: 'prize',    value: 350,  color: '#ff85a2', textColor: '#5a0020', width: 1.3 },
-		{ label: '150€',        type: 'prize',    value: 150,  color: '#ffd6e0', textColor: '#5a0020', width: 1.0 },
-		{ label: '250€',        type: 'prize',    value: 250,  color: '#ffd6e0', textColor: '#5a0020', width: 1.0 },
-		{ label: 'BANCAROTTA',  type: 'bankrupt', value: 0,    color: '#1a0a1e', textColor: '#ff5c8a', width: 0.7 },
-		{ label: '1000€',       type: 'prize',    value: 1000, color: '#c9184a', textColor: '#fff', width: 0.4 },
-		{ label: 'BANCAROTTA',  type: 'bankrupt', value: 0,    color: '#1a0a1e', textColor: '#ff5c8a', width: 0.7 },
-		{ label: '400€',        type: 'prize',    value: 400,  color: '#ff9ab2', textColor: '#5a0020', width: 0.9 },
-		{ label: '200€',        type: 'prize',    value: 400,  color: '#ff9ab2', textColor: '#5a0020', width: 0.9 },
+		{ label: 'Bacio di Gaia (350€)',        type: 'prize',    value: 350,  color: '#ffea00', textColor: '#4a2c0f', width: 1.3 },
+		{ label: '150€',        type: 'prize',    value: 150,  color: '#ffd54f', textColor: '#4a2c0f', width: 1.0 },
+		{ label: '250€',        type: 'prize',    value: 250,  color: '#ffd54f', textColor: '#4a2c0f', width: 1.0 },
+		{ label: 'BANCAROTTA',  type: 'bankrupt', value: 0,    color: '#1a0a02', textColor: '#ffea00', width: 0.7 },
+		{ label: '1000€',       type: 'prize',    value: 1000, color: '#8e0000', textColor: '#fff', width: 0.4 },
+		{ label: 'BANCAROTTA',  type: 'bankrupt', value: 0,    color: '#1a0a02', textColor: '#ffea00', width: 0.7 },
+		{ label: '400€',        type: 'prize',    value: 400,  color: '#ffca28', textColor: '#4a2c0f', width: 0.9 },
+		{ label: '200€',        type: 'prize',    value: 400,  color: '#ffca28', textColor: '#4a2c0f', width: 0.9 },
 		{ label: 'PASSA',       type: 'pass',     value: 0,    color: '#9e9eb8', textColor: '#fff', width: 1 },
-		{ label: 'Fai un passo di salsa (800€)',        type: 'prize',    value: 800,  color: '#ff9ab2', textColor: '#5a0020', width: 0.7 }
-		,{ label: '400€',        type: 'prize',    value: 400,  color: '#ff9ab2', textColor: '#5a0020', width: 0.9 }
+		{ label: 'Fai un passo di salsa (800€)',        type: 'prize',    value: 800,  color: '#ffca28', textColor: '#4a2c0f', width: 0.7 }
+		,{ label: '400€',        type: 'prize',    value: 400,  color: '#ffca28', textColor: '#4a2c0f', width: 0.9 }
 	];
 
 	var canvas, ctx;
@@ -121,14 +121,14 @@ var Wheel = (function () {
 		// --- Cerchio centrale ---
 		ctx.beginPath();
 		ctx.arc(cx, cy, 22, 0, 2 * Math.PI);
-		ctx.fillStyle = '#fff0f3';
+		ctx.fillStyle = '#fffde7';
 		ctx.fill();
-		ctx.strokeStyle = '#ff5c8a';
+		ctx.strokeStyle = '#e53935';
 		ctx.lineWidth = 3;
 		ctx.stroke();
 
 		// Stellina centrale
-		ctx.fillStyle = '#ff5c8a';
+		ctx.fillStyle = '#e53935';
 		ctx.font = 'bold 18px Arial';
 		ctx.textAlign = 'center';
 		ctx.textBaseline = 'middle';
@@ -138,9 +138,9 @@ var Wheel = (function () {
 		// --- Bordo esterno ---
 		ctx.beginPath();
 		ctx.arc(cx, cy, radius, 0, 2 * Math.PI);
-		ctx.strokeStyle = '#ff5c8a';
+		ctx.strokeStyle = '#e53935';
 		ctx.lineWidth = 4;
-		ctx.shadowColor = 'rgba(255,92,138,0.5)';
+		ctx.shadowColor = 'rgba(229,57,53,0.5)';
 		ctx.shadowBlur = 12;
 		ctx.stroke();
 		ctx.shadowBlur = 0;
@@ -160,8 +160,8 @@ var Wheel = (function () {
 		ctx.lineTo(px - 11, py);
 		ctx.lineTo(px + 11, py);
 		ctx.closePath();
-		ctx.fillStyle = '#c9184a';
-		ctx.shadowColor = 'rgba(201,24,74,0.6)';
+		ctx.fillStyle = '#7f0000';
+		ctx.shadowColor = 'rgba(127,0,0,0.6)';
 		ctx.shadowBlur = 8;
 		ctx.fill();
 		ctx.strokeStyle = '#fff';

@@ -28,6 +28,7 @@ var Players = (function () {
 
 	Player.prototype.bankrupt = function () {
 		this.roundScore = 0;
+		this.totalScore = 0;
 		renderPlayers();
 	};
 

@@ -4,17 +4,10 @@ var PLAYER_GROUPS = {
 		"Ale",
 		"Giulia"
 	],
-	"Partita 2": [
-		"Diana",
-		"Emanuele",
-		"Francesca",
-		"Gabriele"
-	],
-	"Partita 3": [
-		"Helena",
-		"Ivan",
-		"Jessica",
-		"Kevin",
-		"Laura"
+	"Partita ufficiale": [
+		"Enza Sessa",
+		"Le formidable",
+		"I Gini",
+		"HIHA"
 	]
 };

@@ -232,7 +232,7 @@ var Game = (function () {
 		} else if (slice.type === 'bankrupt') {
 			if (typeof playErrorSound === 'function') playErrorSound();
 			Players.current().bankrupt();
-			_showTurnBanner('💸 BANCAROTTA! Hai perso tutto il montepremi accumulato!', 'bankrupt');
+			_showTurnBanner('💸 BANCAROTTA! Hai perso tutto il patrimonio accumulato, manche e totale!', 'bankrupt');
 			_state = 'PLAYER_TURN';
 			setTimeout(_nextPlayerTurn, 2800);
 		}

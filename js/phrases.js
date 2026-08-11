@@ -18,7 +18,9 @@ const PHRASE_GROUPS = {
 	"le avventure di Gaia": [
 		{ "frase": "La grande punto esce dal parcheggio da sola", "tema": "Indipendenza", "bonus": 1000 },
 		{ "frase": "Essere fermata all'aeroporto per un chorizo", "tema": "Olè", "bonus": 1000 },
-		{ "frase": "D'estate a finestrini chiusi per i serpenti volanti", "tema": " Con il caldo", "bonus": 1000 },
+		{ "frase": "D'estate a finestrini chiusi per i serpenti volanti", "tema": " Con il caldo", "bonus": 1000 }
+	],
+	"bonus":[
 		{ "frase": "Ballare all'olimpico con scarpe discutibili", "tema": "Il 6 giugno", "bonus": 1000 }
 	]
 };
